@@ -1,6 +1,4 @@
-const {
-    Model 
-  } = require('sequelize');
+const { Model } = require('sequelize');
   module.exports = (sequelize, DataTypes) => {
     class User extends Model {
       /**
@@ -18,25 +16,46 @@ const {
                 allowNull: false,
                 validate: {
                   notEmpty: {
-                    msg: 'Please enter a title, this field cannot be left blank.'
+                    msg: 'Please enter a first name, this field cannot be left blank.'
                   }
                 }},
         lastName: {type: DataTypes.STRING,
                 allowNull: false,
               validate: {
                 notEmpty: {
-                  msg: 'Please enter an author name, this field cannot be left blank.'
+                  msg: 'Please enter an lasr name, this field cannot be left blank.'
                 }
               } },
-        emailAddress: DataTypes.STRING,
-        password: DataTypes.STRING
+        emailAddress: { type: DataTypes.STRING,
+          allowNull: false,
+          unique: {
+            msg: 'This email address is already in use.'
+          },
+          validate: {
+            notEmpty: {
+              msg: 'Please enter an email address.'
+            }
+          }
+        },
+        password: { type: DataTypes.STRING, 
+          allowNull: false,
+          set(val) {
+            const hashedPassword = bcrypt.hashSync(val, 10);
+            this.setDataValue("password", hashedPassword);
+          },
+          validation: {
+            notEmpty: {
+              msg: 'Please enter a password.'
+            }
+          }
+        }
       }, {
         sequelize,
         modelName: 'User',
       });
-
+//Defines association between User and Course models
       User.associate = (models) => {
-        User.hasMany(models.Course, {foreignKey: 'userId'});
+        User.hasMany(models.Course, {foreignKey: 'userId', allowNull: false});
   };
       return User;
 

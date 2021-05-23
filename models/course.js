@@ -1,8 +1,9 @@
-const { ConnectionRefusedError } = require('sequelize');
-const {
-    Model 
-  } = require('sequelize');
-  module.exports = (sequelize, DataTypes) => {
+'use strict';
+
+const { Model, DataTypes, ConnectionRefusedError } = require('sequelize');
+
+
+  module.exports = (sequelize) => {
     class Course extends Model {
       /**
        * Helper method for defining associations.
@@ -22,7 +23,7 @@ const {
                     msg: 'Please enter a title, this field cannot be left blank.'
                   }
                 }},
-        description: {type: DataTypes.STRING,
+        description: {type: DataTypes.TEXT,
                 allowNull: false,
                 validate: {
                 notEmpty: {
@@ -30,12 +31,12 @@ const {
                 }
               } },
         estimatedTime: DataTypes.STRING,
-        materialsNeeded: DataTypes.INTEGER 
+        materialsNeeded: DataTypes.STRING 
       }, {
         sequelize,
         modelName: 'Course',
       });
-
+//Defines association between User and Course models
       Course.associate = (models) => {
             Course.belongsTo(models.User, {foreignKey: 'userId'});
       };
