@@ -23,10 +23,10 @@ function asyncHandler(cb) {
 //Returns a list of all courses including the User that owns each course and a 200 HTTP status code
 router.get('/', asyncHandler(async(req, res, next) => {
     const courses = await Course.findAll({
-        attributes: ['title', 'description', 'estimatedTime', 'materialsNeeded'],
+        attributes: ['id', 'title', 'description', 'estimatedTime', 'materialsNeeded', 'userId'],
         include: [
             {model: User,
-            attributes: ['firstName', 'lastName', 'emailAddress']}
+            attributes: ['id', 'firstName', 'lastName', 'emailAddress']}
         ]
     });
     res.json(courses);
@@ -34,9 +34,9 @@ router.get('/', asyncHandler(async(req, res, next) => {
 //Returns the corresponding course along with the User that owns that course and a 200 HTTP status code
 router.get('/:id', asyncHandler(async(req, res, next) => {
      const course = await Course.findByPk(req.params.id, {
-     attributes: ['title', 'description', 'estimatedTime', 'materialsNeeded'],
+     attributes: ['id', 'title', 'description', 'estimatedTime', 'materialsNeeded', 'userId'],
         include: [{ model: User,
-        attributes: ['firstName', 'lastName', 'emailAddress']}]
+        attributes: ['id', 'firstName', 'lastName', 'emailAddress']}]
      });
     if (course) {
         res.json(course); 
@@ -59,21 +59,37 @@ router.post('/', authenticateUser, asyncHandler(async(req, res, next) => {
     }
 }))
 //Update the corresponding course and returns a 204 HTTP status code 
-router.put('/:id', asyncHandler(async(req, res, next) => {
-      const course = await Course.findByPk(req.params.id);
-      if (course) {
-          const user = req.currentUser;
-          if (user.id === course.userId) {
-            await course.update(req.body);
-            res.status(204).end();
-          } else {
-              res.status(403).json({ message: 'User ID does not match'});
-          }
-          
-      } else {
-          res.status(404).json({ message: 'The course you are trying to update was not found'});
-      }
-}))
+router.put('/:id', authenticateUser, asyncHandler(async(req, res, next) => {
+      const course = await Course.findByPk(req.params.id, {
+        attributes: ['id', 'title', 'description', 'estimatedTime', 'materialsNeeded', 'userId'],
+        include: [{ model: User,
+        attributes: ['id', 'firstName', 'lastName', 'emailAddress']}]
+     }); 
+        if (course) {
+            const user = req.currentUser;
+                if (user.id === course.userId) {
+                    try {
+                        await course.update(req.body);
+                        res.status(204).end();
+                    } catch (error) {
+                        if (error.name === 'SequelizeValidationError') {
+                            const errors = error.errors.map(err => err.message);
+                            res.status(400).json(errors);
+                        }
+                        else {
+                            next(error);
+                                    }           
+                                }
+                            }
+                else {
+                    res.status(403).json({message: 'Access denied. '});
+                }
+            }
+            else {
+                res.status(404).json({ message: 'Course Not Found.'});
+            }
+    }));
+    
 //Deletes the corresponding course and returns a 204 HTTP status code
 router.delete('/:id', authenticateUser, asyncHandler(async(req, res, next) => {
       const course = await Course.findByPk(req.params.id);

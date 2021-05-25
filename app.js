@@ -56,14 +56,14 @@ app.use((err, req, res, next) => {
 app.set('port', process.env.PORT || 5000);
 
 // database connection 
-(async() => {
+(async () => {
   try {
     await sequelize.authenticate();
     console.log('Connection to the database was successful!');
   } catch (error) {
-    console.log('Oh no! Connection to the database was unsuccessful.')
+    console.log('Oh no! Connection to the database was unsuccessful.');
   }
-})
+})();
 
 
 // start listening on our port

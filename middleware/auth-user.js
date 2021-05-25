@@ -18,22 +18,26 @@ exports.authenticateUser = async (req, res, next) => {
             }
     });
     if (user) {
-        const authenticated = bcrypt
-        .compareSync(userCredentials.pass, user.password);
-        if(authenticated) {
+        const authenticated = bcrypt.compareSync(userCredentials.pass, user.password);
+
+        if (authenticated) {
             console.log(`Authentication successful for: ${user.firstName} ${user.lastName}`)
             req.currentUser = user;
+
         } else {
-            message = `Authentication unsuccessful for: ${user.firstName} ${user.lastName}`
+            message = `Authentication failed for: ${user.firstName} ${user.lastName}`;
         }
-        }  else {
+        } else {
+            message = `User ${user.firstName} ${user.lastName} not found.`;
+        }
+        } else {
             message = 'Authorization header not found.';
         }
+
         if (message) {
             console.log(message);
             res.status(401).json({message: 'Access Denied'})
         } else {
             next();
         }
-    }
-}
+    };

@@ -1,4 +1,8 @@
+'use strict'
+
 const { Model } = require('sequelize');
+const bcrypt = require('bcryptjs');
+
   module.exports = (sequelize, DataTypes) => {
     class User extends Model {
       /**
@@ -34,6 +38,9 @@ const { Model } = require('sequelize');
           validate: {
             notEmpty: {
               msg: 'Please enter an email address.'
+            },
+            isEmail: {
+              msg: 'This email address is not valid.'
             }
           }
         },
@@ -56,7 +63,7 @@ const { Model } = require('sequelize');
 //Defines association between User and Course models
       User.associate = (models) => {
         User.hasMany(models.Course, {foreignKey: 'userId', allowNull: false});
-  };
+  }; 
       return User;
 
 };

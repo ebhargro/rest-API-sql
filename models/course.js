@@ -16,6 +16,10 @@ const { Model, DataTypes, ConnectionRefusedError } = require('sequelize');
     };
     //Adding Sequelize ORM validation and appropriate error messages to ensure the title and author values cannot be empty
     Course.init({
+        id: {type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
         title: {type: DataTypes.STRING, 
                 allowNull: false,
                 validate: {
